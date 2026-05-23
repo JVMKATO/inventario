@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventarios - Prototipo V5</title>
+    <style>
+        :root {
+            --primary: #2563eb; --primary-hover: #1d4ed8;
+            --bg: #f3f4f6; --panel-bg: #ffffff; --text: #1f2937;
+            --border: #e5e7eb; --danger: #dc2626; --danger-hover: #b91c1c;
+            --success: #16a34a; --warning: #d97706; --purple: #7e22ce; --teal: #0d9488;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 1350px; margin: 0 auto; }
+        .card { background: var(--panel-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        #login-view { max-width: 400px; margin: 100px auto; text-align: center; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95em; }
+        
+        button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
+        button:hover { background-color: var(--primary-hover); }
+        button.btn-danger { background-color: var(--danger); }
+        button.btn-success { background-color: var(--success); }
+        button.btn-purple { background-color: var(--purple); }
+        button.btn-teal { background-color: var(--teal); }
+        button.btn-small { width: auto; padding: 5px 10px; font-size: 0.85em; }
+
+        nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background-color: #f8fafc; color: #475569; white-space: nowrap; }
+        tr.anulada { background-color: #fef2f2; color: #991b1b; text-decoration: line-through; }
+
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; display: inline-block; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; text-decoration: none !important; }
+        .badge-teal { background: #ccfbf1; color: #115e59; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2em; font-weight: bold; }
+        .close-btn { background: none; color: var(--danger); font-size: 1.5em; width: auto; padding: 0; }
+        
+        .flex-row { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-view" class="card">
+        <h2>Sistema de Inventarios V5</h2>
+        <p style="font-size: 0.85em; color: #666; margin: 15px 0; line-height: 1.4;">
+            <b>Usuarios de prueba:</b><br>
+            Admin: <code>admin</code> / 123<br>
+            Sup. Norte: <code>norte</code> / 123
+        </p>
+        <div class="form-group"><label>Usuario</label><input type="text" id="login-user"></div>
+        <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass"></div>
+        <button onclick="login()">Ingresar</button>
+    </div>
+
+    <!-- VISTA PRINCIPAL -->
+    <div id="app-view" class="container hidden">
+        <nav class="card">
+            <div>
+                <h2 id="welcome-text">Bienvenido</h2>
+                <p id="user-role-text" style="color: #64748b; font-size: 0.9em;"></p>
+            </div>
+            <button class="btn-danger btn-small" onclick="logout()">Cerrar Sesión</button>
+        </nav>
+
+        <!-- PANEL ADMINISTRADOR -->
+        <div id="admin-panel" class="hidden">
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+                <!-- 1. Gestión de Sucursales (Expansión) -->
+                <div class="card" style="border-top: 5px solid var(--teal);">
+                    <h3 style="color: var(--teal);">Gestión de Sucursales</h3>
+                    <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Expande la empresa abriendo nuevas sucursales.</p>
+                    <div class="flex-row">
+                        <div class="form-group" style="flex: 1; margin: 0;"><input type="text" id="new-branch-name" placeholder="Ej: Sucursal Este"></div>
+                        <button class="btn-teal" onclick="addBranch()" style="width: auto;">Inaugurar</button>
+                    </div>
+                    <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                        <table style="margin-top: 0;">
+                            <tbody id="branches-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. Gestión de Personal (RRHH) -->
+                <div class="card" style="border-top: 5px solid var(--purple);">
+                    <h3 style="color: var(--purple);">Gestión de Personal (RRHH)</h3>
+                    <div class="flex-row" style="margin-top: 15px;">
+                        <div class="form-group" style="flex: 2;"><input type="text" id="new-user-fullname" placeholder="Nombre Completo"></div>
+                        <div class="form-group" style="flex: 1;"><input type="text" id="new-user-nick" placeholder="Login"></div>
+                        <div class="form-group" style="flex: 1;"><input type="text" id="new-user-pass" placeholder="Clave"></div>
+                        <div class="form-group" style="flex: 1;">
+                            <select id="new-user-role">
+                                <option value="supervisor">Supervisor</option>
+                                <option value="vendedor">Vendedor</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <select id="new-user-branch-select">
+                                <!-- Se llena por JS -->
+                            </select>
+                        </div>
+                        <button class="btn-purple" onclick="addUser()" style="width: auto; height: 41px; margin-top: 5px;">Registrar</button>
+                    </div>
+                    <div style="overflow-x: auto; max-height: 200px;">
+                        <table>
+                            <thead><tr><th>Empleado</th><th>Usuario</th><th>Rol</th><th>Sucursal</th><th>Acción</th></tr></thead>
+                            <tbody id="users-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Formulario de Nuevo Producto -->
+            <div class="card" style="border-left: 5px solid var(--primary);">
+                <h3>Distribuir Nuevo Producto al Inventario</h3>
+                <div class="flex-row" style="margin-top: 15px;">
+                    <div class="form-group" style="flex: 2;"><input type="text" id="new-name" placeholder="Nombre del componente"></div>
+                    <div class="form-group" style="flex: 1;">
+                        <select id="new-product-branch-select">
+                            <!-- Se llena por JS -->
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;"><input type="number" id="new-qty" placeholder="Stock Inicial"></div>
+                    <div class="form-group" style="flex: 1;"><input type="number" id="new-price" placeholder="Precio ($)"></div>
+                    <button onclick="addProduct()" style="width: auto; height: 41px; margin-top: 5px;">Agregar al Inventario</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE MONITOREO DE VENTAS -->
+        <div class="card" style="border-left: 5px solid var(--warning);">
+            <h3 id="sales-monitor-title">Monitor de Ventas</h3>
+            <div style="overflow-x: auto; margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Venta</th><th id="col-sucursal">Sucursal</th><th>Vendedor</th>
+                            <th>Producto</th><th>Cant.</th><th>Total</th><th>Observaciones</th>
+                            <th>Estado</th><th id="col-accion">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TABLA DE INVENTARIO -->
+        <div class="card">
+            <h3 id="inventory-title">Inventario</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Producto</th><th>Sucursal</th><th>Stock Disp.</th><th>Precio Base</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE VENTA -->
+    <div id="sale-modal" class="modal">
+        <!-- Contenido omitido visualmente para ahorrar espacio, funcionalidad idéntica -->
+        <div class="modal-content">
+            <div class="modal-header"><span>Registrar Venta</span><button class="close-btn" onclick="closeModal('sale-modal')">&times;</button></div>
+            <h3 id="sale-product-name" style="color: var(--primary);"></h3>
+            <p style="margin-bottom: 15px;">Stock: <span id="sale-current-stock" style="font-weight: bold;"></span></p>
+            <input type="hidden" id="sale-product-id">
+            <div class="flex-row">
+                <div class="form-group" style="flex: 1;"><label>Cliente</label><input type="text" id="sale-customer-name"></div>
+                <div class="form-group" style="flex: 1;"><label>Cantidad</label><input type="number" id="sale-qty" min="1" value="1" oninput="calculateTotal()"></div>
+                <div class="form-group" style="flex: 1;"><label>P. Unit ($)</label><input type="number" id="sale-price" oninput="calculateTotal()"></div>
+            </div>
+            <div class="form-group"><label>Observaciones</label><textarea id="sale-comments" rows="2"></textarea></div>
+            <div style="background: #eff6ff; padding: 15px; text-align:center; margin-bottom: 15px;">
+                <h3 style="color: #1e3a8a;">Total a Pagar: $<span id="sale-total">0.00</span></h3>
+            </div>
+            <button class="btn-success" onclick="confirmSale()">Procesar Transacción</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE HISTORIAL POR PRODUCTO -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header"><span>Historial del Producto</span><button class="close-btn" onclick="closeModal('history-modal')">&times;</button></div>
+            <h3 id="history-product-name" style="margin-bottom: 15px;"></h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Fecha</th><th>Vendedor</th><th>Cant.</th><th>Total</th><th>Estado</th></tr></thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS LOCAL ---
+        // 1. Nueva lista dinámica de sucursales
+        let branches = ['Sucursal Norte', 'Sucursal Sur'];
+
+        let users = [
+            { id: 1, user: 'admin', pass: '123', role: 'admin', branch: 'Todas', fullName: 'Administrador General' },
+            { id: 2, user: 'norte', pass: '123', role: 'supervisor', branch: 'Sucursal Norte', fullName: 'Juan Pérez (Sup)' },
+            { id: 4, user: 'pedro', pass: '123', role: 'vendedor', branch: 'Sucursal Norte', fullName: 'Pedro Ramírez' }
+        ];
+
+        let products = [
+            { id: 1, name: 'Placa Madre B650 AORUS', branch: 'Sucursal Norte', stock: 5, price: 210 },
+            { id: 2, name: 'Procesador Intel i5 13400F', branch: 'Sucursal Sur', stock: 1, price: 180 }
+        ];
+
+        let salesLog = []; 
+        let currentUser = null;
+
+        // --- INICIALIZACIÓN ---
+        // Carga los desplegables de sucursales apenas carga el script
+        function updateBranchSelects() {
+            const userSelect = document.getElementById('new-user-branch-select');
+            const productSelect = document.getElementById('new-product-branch-select');
+            userSelect.innerHTML = '';
+            productSelect.innerHTML = '';
+            
+            branches.forEach(b => {
+                userSelect.innerHTML += `<option value="${b}">${b}</option>`;
+                productSelect.innerHTML += `<option value="${b}">${b}</option>`;
+            });
+            renderBranchesTable();
+        }
+
+        // --- GESTIÓN DE SUCURSALES (EXPANSIÓN) ---
+        function addBranch() {
+            const name = document.getElementById('new-branch-name').value.trim();
+            if (!name) return alert("Ingrese el nombre de la nueva sucursal.");
+            
+            // Validar que no exista ya (ignorando mayúsculas/minúsculas)
+            const exists = branches.find(b => b.toLowerCase() === name.toLowerCase());
+            if (exists) return alert("Esa sucursal ya existe en el sistema.");
+
+            branches.push(name);
+            document.getElementById('new-branch-name').value = '';
+            
+            // Actualizar todas las listas desplegables
+            updateBranchSelects();
+            alert(`¡Felicidades! La ${name} ha sido inaugurada exitosamente en el sistema.`);
+        }
+
+        function renderBranchesTable() {
+            const tbody = document.getElementById('branches-body');
+            tbody.innerHTML = '';
+            branches.forEach(b => {
+                tbody.innerHTML += `<tr><td><span class="badge badge-teal">Activa</span> <strong>${b}</strong></td></tr>`;
+            });
+        }
+
+        // --- AUTENTICACIÓN ---
+        function login() {
+            const u = document.getElementById('login-user').value.toLowerCase();
+            const p = document.getElementById('login-pass').value;
+            const userFound = users.find(x => x.user === u && x.pass === p);
+            
+            if (userFound) {
+                currentUser = userFound;
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                
+                document.getElementById('welcome-text').innerText = `Hola, ${currentUser.fullName}`;
+                document.getElementById('user-role-text').innerText = currentUser.role === 'admin' 
+                    ? 'Panel de Control Principal' 
+                    : `${currentUser.role.toUpperCase()} - ${currentUser.branch} (Usuario: ${currentUser.user})`;
+                
+                if (currentUser.role === 'admin') {
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    document.getElementById('col-sucursal').style.display = 'table-cell';
+                    document.getElementById('col-accion').style.display = 'table-cell';
+                    updateBranchSelects(); // Refrescar combos
+                    renderUsersTable();
+                } else {
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('col-sucursal').style.display = 'none';
+                    document.getElementById('col-accion').style.display = 'none';
+                }
+                renderInventory();
+                renderSalesMonitor();
+            } else {
+                alert("Usuario incorrecto o dado de baja.");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('login-view').classList.remove('hidden');
+            document.getElementById('app-view').classList.add('hidden');
+        }
+
+        // --- GESTIÓN DE PERSONAL ---
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-body');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                if(u.role === 'admin') return;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${u.fullName}</strong></td><td><code>${u.user}</code></td>
+                        <td>${u.role}</td><td>${u.branch}</td>
+                        <td><button class="btn-danger btn-small" onclick="deleteUser(${u.id})">Baja</button></td>
+                    </tr>`;
+            });
+        }
+
+        function addUser() {
+            const fullName = document.getElementById('new-user-fullname').value;
+            const nick = document.getElementById('new-user-nick').value.toLowerCase().replace(/\s/g, '');
+            const pass = document.getElementById('new-user-pass').value;
+            const role = document.getElementById('new-user-role').value;
+            const branch = document.getElementById('new-user-branch-select').value; // Usar el select dinámico
+
+            if (!fullName || !nick || !pass) return alert("Complete Nombre, Usuario y Contraseña.");
+            if (users.some(u => u.user === nick)) return alert("El login ya existe.");
+
+            users.push({ id: Date.now(), user: nick, pass: pass, role: role, branch: branch, fullName: fullName });
+            renderUsersTable();
+            alert(`Empleado registrado exitosamente en ${branch}.`);
+        }
+
+        function deleteUser(id) {
+            const uIndex = users.findIndex(u => u.id === id);
+            if (uIndex > -1 && confirm(`¿Dar de baja a ${users[uIndex].fullName}?`)) {
+                users.splice(uIndex, 1);
+                renderUsersTable();
+            }
+        }
+
+        // --- PRODUCTOS ---
+        function renderInventory() {
+            const tbody = document.getElementById('inventory-body');
+            tbody.innerHTML = '';
+            const filtered = currentUser.role === 'admin' ? products : products.filter(p => p.branch === currentUser.branch);
+
+            filtered.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.branch}</td>
+                        <td><span style="color: ${p.stock <= 1 ? 'var(--danger)' : 'var(--success)'}; font-weight: bold;">${p.stock} uds</span></td>
+                        <td>$${p.price}</td>
+                        <td>
+                            <button class="btn-success btn-small" onclick="openSaleModal(${p.id})">Vender</button>
+                            <button class="btn-small" onclick="openHistoryModal(${p.id})" style="background: #4b5563;">Kardex</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function addProduct() {
+            const name = document.getElementById('new-name').value;
+            const branch = document.getElementById('new-product-branch-select').value; // Usar el select dinámico
+            const qty = parseInt(document.getElementById('new-qty').value);
+            const price = parseFloat(document.getElementById('new-price').value);
+            
+            if (!name || isNaN(qty) || isNaN(price)) return alert("Datos incompletos.");
+            
+            products.push({ id: Date.now(), name: name, branch: branch, stock: qty, price: price });
+            renderInventory(); alert("Producto indexado.");
+        }
+
+        // --- VENTAS ---
+        function openSaleModal(id) {
+            const product = products.find(p => p.id === id);
+            document.getElementById('sale-product-id').value = product.id;
+            document.getElementById('sale-product-name').innerText = product.name;
+            document.getElementById('sale-current-stock').innerText = product.stock;
+            document.getElementById('sale-price').value = product.price; 
+            calculateTotal();
+            document.getElementById('sale-modal').style.display = 'flex';
+        }
+
+        function calculateTotal() {
+            document.getElementById('sale-total').innerText = (
+                (parseInt(document.getElementById('sale-qty').value)||0) * (parseFloat(document.getElementById('sale-price').value)||0)
+            ).toFixed(2);
+        }
+
+        function confirmSale() {
+            const id = parseInt(document.getElementById('sale-product-id').value);
+            const qty = parseInt(document.getElementById('sale-qty').value);
+            const product = products.find(p => p.id === id);
+
+            if (product.stock - qty < 1) return alert(`No se permite vender la última unidad.`);
+            
+            product.stock -= qty;
+            salesLog.push({
+                id: salesLog.length + 1, date: new Date().toLocaleString('es-ES'),
+                sellerName: currentUser.fullName, sellerRole: currentUser.role,
+                productId: product.id, productName: product.name, branch: product.branch,
+                qty: qty, total: parseFloat(document.getElementById('sale-total').innerText),
+                customer: document.getElementById('sale-customer-name').value || 'General',
+                comments: document.getElementById('sale-comments').value || 'S/O',
+                status: 'ACTIVA'
+            });
+
+            closeModal('sale-modal'); renderInventory(); renderSalesMonitor();
+        }
+
+        function renderSalesMonitor() {
+            const tbody = document.getElementById('sales-body');
+            tbody.innerHTML = '';
+            const visible = currentUser.role === 'admin' ? salesLog : salesLog.filter(s => s.branch === currentUser.branch);
+
+            [...visible].reverse().forEach(sale => {
+                const tr = document.createElement('tr');
+                if (sale.status === 'ANULADA') tr.className = 'anulada';
+                
+                let tdSuc = currentUser.role === 'admin' ? `<td><strong>${sale.branch}</strong></td>` : '';
+                let tdAcc = currentUser.role === 'admin' ? `<td>${sale.status === 'ACTIVA' ? `<button class="btn-danger btn-small" onclick="annulSale(${sale.id})">Anular</button>` : 'Ajustado'}</td>` : '';
+
+                tr.innerHTML = `
+                    <td>#${sale.id}</td>${tdSuc}
+                    <td>${sale.sellerName}</td><td>${sale.productName}</td><td>${sale.qty}</td>
+                    <td><strong>$${sale.total.toFixed(2)}</strong></td><td>${sale.comments}</td>
+                    <td><span class="badge ${sale.status === 'ACTIVA' ? 'badge-success' : 'badge-danger'}">${sale.status}</span></td>${tdAcc}
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function annulSale(id) {
+            const sale = salesLog.find(s => s.id === id);
+            if (sale && sale.status !== 'ANULADA' && confirm(`¿Anular venta #${id}?`)) {
+                products.find(p => p.id === sale.productId).stock += sale.qty;
+                sale.status = 'ANULADA';
+                renderInventory(); renderSalesMonitor();
+            }
+        }
+
+        function openHistoryModal(id) {
+            const tbody = document.getElementById('history-body'); tbody.innerHTML = '';
+            const pSales = salesLog.filter(s => s.productId === id);
+            [...pSales].reverse().forEach(s => {
+                tbody.innerHTML += `<tr class="${s.status === 'ANULADA' ? 'anulada' : ''}"><td>${s.date}</td><td>${s.sellerName}</td><td>${s.qty}</td><td>$${s.total.toFixed(2)}</td><td>${s.status}</td></tr>`;
+            });
+            document.getElementById('history-modal').style.display = 'flex';
+        }
+
+        function closeModal(mId) { document.getElementById(mId).style.display = 'none'; }
+        
+        // Cargar listas iniciales
+        updateBranchSelects();
+    </script>
+</body>
+</html>
