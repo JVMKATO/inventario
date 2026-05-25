@@ -3,153 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventarios - Prototipo V5</title>
+    <title>Sistema POS - Prototipo V6 (Responsivo)</title>
     <style>
         :root {
             --primary: #2563eb; --primary-hover: #1d4ed8;
-            --bg: #f3f4f6; --panel-bg: #ffffff; --text: #1f2937;
-            --border: #e5e7eb; --danger: #dc2626; --danger-hover: #b91c1c;
+            --bg: #f1f5f9; --panel-bg: #ffffff; --text: #0f172a;
+            --border: #cbd5e1; --danger: #e11d48; --danger-hover: #be123c;
             --success: #16a34a; --warning: #d97706; --purple: #7e22ce; --teal: #0d9488;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 1350px; margin: 0 auto; }
-        .card { background: var(--panel-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 30px; }
         
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--panel-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        
+        /* Navegación Fija */
+        #main-nav { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--panel-bg); border-bottom: 2px solid var(--primary); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-brand { font-size: 1.2em; font-weight: bold; color: var(--primary); display: flex; flex-direction: column; }
+        .nav-brand small { font-size: 0.65em; color: #64748b; font-weight: normal; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        /* Login */
         #login-view { max-width: 400px; margin: 100px auto; text-align: center; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95em; }
         
-        button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
+        /* Formularios */
+        .form-group { margin-bottom: 12px; text-align: left; width: 100%; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85em; color: #475569; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95em; outline: none; transition: border 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+        
+        /* Botones */
+        button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
         button:hover { background-color: var(--primary-hover); }
         button.btn-danger { background-color: var(--danger); }
+        button.btn-danger:hover { background-color: var(--danger-hover); }
         button.btn-success { background-color: var(--success); }
         button.btn-purple { background-color: var(--purple); }
         button.btn-teal { background-color: var(--teal); }
-        button.btn-small { width: auto; padding: 5px 10px; font-size: 0.85em; }
-
-        nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        button.btn-small { padding: 6px 12px; font-size: 0.85em; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        th { background-color: #f8fafc; color: #475569; white-space: nowrap; }
-        tr.anulada { background-color: #fef2f2; color: #991b1b; text-decoration: line-through; }
+        /* Tablas Responsivas */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; min-width: 600px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background-color: #f8fafc; color: #475569; white-space: nowrap; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        tr.anulada { background-color: #fef2f2; color: #991b1b; text-decoration: line-through; opacity: 0.8; }
 
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; display: inline-block; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; display: inline-block; }
         .badge-success { background: #dcfce7; color: #166534; }
         .badge-danger { background: #fee2e2; color: #991b1b; text-decoration: none !important; }
         .badge-teal { background: #ccfbf1; color: #115e59; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2em; font-weight: bold; }
-        .close-btn { background: none; color: var(--danger); font-size: 1.5em; width: auto; padding: 0; }
+        /* Modales */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); justify-content: center; align-items: center; z-index: 1000; padding: 10px; backdrop-filter: blur(2px); }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 1.2em; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .close-btn { background: none; color: #94a3b8; font-size: 1.5em; width: auto; padding: 0; height: auto; display: flex; }
+        .close-btn:hover { color: var(--danger); background: none; }
         
-        .flex-row { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+        /* Utilidades de Layout */
+        .flex-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 15px; }
+        .flex-1 { flex: 1; min-width: 200px; }
         .hidden { display: none !important; }
+
+        /* Controles de Carrito */
+        .qty-controls { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 2px; border-radius: 6px; width: fit-content; }
+        .qty-btn { background: white; color: var(--text); padding: 2px 10px; border-radius: 4px; border: 1px solid var(--border); }
+        .qty-btn:hover { background: #e2e8f0; }
+        
+        .item-details-input { border: none; border-bottom: 1px dashed var(--primary); border-radius: 0; padding: 5px; background: transparent; width: 100%; font-size: 0.9em; margin-bottom: 5px; }
+        .item-details-input:focus { border-bottom: 1px solid var(--primary); }
+
+        /* --- MEDIA QUERIES (RESPONSIVO) --- */
+        @media (max-width: 768px) {
+            .nav-actions button { padding: 8px; font-size: 0.85em; }
+            .nav-brand { font-size: 1em; }
+            .container { padding: 10px; }
+            .flex-row { flex-direction: column; align-items: stretch; gap: 10px; }
+            .flex-1 { min-width: 100%; }
+            .modal-content { padding: 15px; border-radius: 8px; }
+            table { min-width: 500px; /* Obliga al scroll horizontal en celulares */ }
+            button { width: 100%; } /* Botones ocupan todo el ancho en móvil */
+            .btn-small { width: auto; } /* Excepción para botones de tabla */
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
-    <div id="login-view" class="card">
-        <h2>Sistema de Inventarios V5</h2>
-        <p style="font-size: 0.85em; color: #666; margin: 15px 0; line-height: 1.4;">
-            <b>Usuarios de prueba:</b><br>
-            Admin: <code>admin</code> / 123<br>
-            Sup. Norte: <code>norte</code> / 123
-        </p>
-        <div class="form-group"><label>Usuario</label><input type="text" id="login-user"></div>
-        <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass"></div>
-        <button onclick="login()">Ingresar</button>
+    <nav id="main-nav" class="hidden">
+        <div class="nav-brand">
+            <span id="nav-company-name">TechStore POS</span>
+            <small id="nav-user-info">Usuario</small>
+        </div>
+        <div class="nav-actions">
+            <button class="btn-success" onclick="openCart()">
+                🛒 <span id="cart-counter">0</span>
+            </button>
+            <button class="btn-danger" onclick="logout()">Salir</button>
+        </div>
+    </nav>
+
+    <div id="login-view" class="container">
+        <div class="card" style="margin-top: 50px;">
+            <h2 style="color: var(--primary); margin-bottom: 5px;">Sistema POS V6</h2>
+            <p style="font-size: 0.85em; color: #64748b; margin-bottom: 20px;">Multisucursal, Responsivo y con Carrito</p>
+            
+            <div style="background: #f8fafc; padding: 10px; border-radius: 6px; text-align: left; font-size: 0.85em; color: #475569; margin-bottom: 20px;">
+                <b>Usuarios Demo:</b><br>
+                Admin: <code>admin</code> / 123<br>
+                Vendedor: <code>norte</code> / 123
+            </div>
+
+            <div class="form-group"><label>Usuario</label><input type="text" id="login-user"></div>
+            <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass"></div>
+            <button onclick="login()">Iniciar Sesión</button>
+        </div>
     </div>
 
-    <!-- VISTA PRINCIPAL -->
     <div id="app-view" class="container hidden">
-        <nav class="card">
-            <div>
-                <h2 id="welcome-text">Bienvenido</h2>
-                <p id="user-role-text" style="color: #64748b; font-size: 0.9em;"></p>
-            </div>
-            <button class="btn-danger btn-small" onclick="logout()">Cerrar Sesión</button>
-        </nav>
-
-        <!-- PANEL ADMINISTRADOR -->
+        
         <div id="admin-panel" class="hidden">
-            
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
-                <!-- 1. Gestión de Sucursales (Expansión) -->
-                <div class="card" style="border-top: 5px solid var(--teal);">
-                    <h3 style="color: var(--teal);">Gestión de Sucursales</h3>
-                    <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Expande la empresa abriendo nuevas sucursales.</p>
-                    <div class="flex-row">
-                        <div class="form-group" style="flex: 1; margin: 0;"><input type="text" id="new-branch-name" placeholder="Ej: Sucursal Este"></div>
-                        <button class="btn-teal" onclick="addBranch()" style="width: auto;">Inaugurar</button>
-                    </div>
-                    <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
-                        <table style="margin-top: 0;">
-                            <tbody id="branches-body"></tbody>
-                        </table>
+            <div class="flex-row" style="gap: 20px;">
+                <div class="card flex-1" style="border-top: 4px solid var(--teal); margin-bottom: 0;">
+                    <h3 style="color: var(--teal); margin-bottom: 15px;">Inaugurar Sucursal</h3>
+                    <div class="flex-row" style="margin-bottom: 0;">
+                        <div class="form-group flex-1" style="margin-bottom: 0;"><input type="text" id="new-branch-name" placeholder="Nombre de Sucursal"></div>
+                        <button class="btn-teal" onclick="addBranch()" style="width: auto;">Crear</button>
                     </div>
                 </div>
 
-                <!-- 2. Gestión de Personal (RRHH) -->
-                <div class="card" style="border-top: 5px solid var(--purple);">
-                    <h3 style="color: var(--purple);">Gestión de Personal (RRHH)</h3>
-                    <div class="flex-row" style="margin-top: 15px;">
-                        <div class="form-group" style="flex: 2;"><input type="text" id="new-user-fullname" placeholder="Nombre Completo"></div>
-                        <div class="form-group" style="flex: 1;"><input type="text" id="new-user-nick" placeholder="Login"></div>
-                        <div class="form-group" style="flex: 1;"><input type="text" id="new-user-pass" placeholder="Clave"></div>
-                        <div class="form-group" style="flex: 1;">
-                            <select id="new-user-role">
-                                <option value="supervisor">Supervisor</option>
-                                <option value="vendedor">Vendedor</option>
-                            </select>
+                <div class="card flex-1" style="border-top: 4px solid var(--purple); margin-bottom: 0;">
+                    <h3 style="color: var(--purple); margin-bottom: 15px;">Registrar Personal</h3>
+                    <div class="flex-row" style="margin-bottom: 0;">
+                        <div class="form-group"><input type="text" id="new-user-fullname" placeholder="Nombre Completo"></div>
+                        <div class="form-group"><input type="text" id="new-user-nick" placeholder="Login"></div>
+                        <div class="form-group">
+                            <select id="new-user-branch-select"></select>
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <select id="new-user-branch-select">
-                                <!-- Se llena por JS -->
-                            </select>
-                        </div>
-                        <button class="btn-purple" onclick="addUser()" style="width: auto; height: 41px; margin-top: 5px;">Registrar</button>
-                    </div>
-                    <div style="overflow-x: auto; max-height: 200px;">
-                        <table>
-                            <thead><tr><th>Empleado</th><th>Usuario</th><th>Rol</th><th>Sucursal</th><th>Acción</th></tr></thead>
-                            <tbody id="users-body"></tbody>
-                        </table>
+                        <button class="btn-purple" onclick="addUser()">Registrar</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. Formulario de Nuevo Producto -->
-            <div class="card" style="border-left: 5px solid var(--primary);">
-                <h3>Distribuir Nuevo Producto al Inventario</h3>
-                <div class="flex-row" style="margin-top: 15px;">
-                    <div class="form-group" style="flex: 2;"><input type="text" id="new-name" placeholder="Nombre del componente"></div>
-                    <div class="form-group" style="flex: 1;">
-                        <select id="new-product-branch-select">
-                            <!-- Se llena por JS -->
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;"><input type="number" id="new-qty" placeholder="Stock Inicial"></div>
-                    <div class="form-group" style="flex: 1;"><input type="number" id="new-price" placeholder="Precio ($)"></div>
-                    <button onclick="addProduct()" style="width: auto; height: 41px; margin-top: 5px;">Agregar al Inventario</button>
+            <div class="card" style="border-left: 4px solid var(--primary); margin-top: 20px;">
+                <h3 style="margin-bottom: 15px;">Agregar Producto al Inventario</h3>
+                <div class="flex-row" style="margin-bottom: 0;">
+                    <div class="form-group flex-1"><label>Nombre</label><input type="text" id="new-name"></div>
+                    <div class="form-group flex-1"><label>Sucursal</label><select id="new-product-branch-select"></select></div>
+                    <div class="form-group" style="width: 100px;"><label>Stock</label><input type="number" id="new-qty"></div>
+                    <div class="form-group" style="width: 120px;"><label>Precio Base</label><input type="number" id="new-price"></div>
+                    <button onclick="addProduct()" style="width: auto; height: 42px;">Agregar</button>
                 </div>
             </div>
         </div>
 
-        <!-- PANEL DE MONITOREO DE VENTAS -->
-        <div class="card" style="border-left: 5px solid var(--warning);">
-            <h3 id="sales-monitor-title">Monitor de Ventas</h3>
-            <div style="overflow-x: auto; margin-top: 15px;">
+        <div class="card">
+            <h3 id="inventory-title" style="margin-bottom: 15px; color: var(--text);">Catálogo de Productos</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Producto</th><th>Sucursal</th><th>Stock Disp.</th><th>Precio</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--warning);">
+            <h3 id="sales-monitor-title" style="margin-bottom: 15px;">Historial de Operaciones</h3>
+            <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>ID Venta</th><th id="col-sucursal">Sucursal</th><th>Vendedor</th>
-                            <th>Producto</th><th>Cant.</th><th>Total</th><th>Observaciones</th>
+                            <th>Recibo</th><th id="col-sucursal">Sucursal</th><th>Vendedor</th>
+                            <th>Cliente</th><th>Detalle de Productos</th><th>Total</th>
                             <th>Estado</th><th id="col-accion">Acción</th>
                         </tr>
                     </thead>
@@ -157,50 +186,61 @@
                 </table>
             </div>
         </div>
-
-        <!-- TABLA DE INVENTARIO -->
-        <div class="card">
-            <h3 id="inventory-title">Inventario</h3>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr><th>ID</th><th>Producto</th><th>Sucursal</th><th>Stock Disp.</th><th>Precio Base</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody id="inventory-body"></tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
-    <!-- MODAL DE VENTA -->
-    <div id="sale-modal" class="modal">
-        <!-- Contenido omitido visualmente para ahorrar espacio, funcionalidad idéntica -->
+    <div id="cart-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><span>Registrar Venta</span><button class="close-btn" onclick="closeModal('sale-modal')">&times;</button></div>
-            <h3 id="sale-product-name" style="color: var(--primary);"></h3>
-            <p style="margin-bottom: 15px;">Stock: <span id="sale-current-stock" style="font-weight: bold;"></span></p>
-            <input type="hidden" id="sale-product-id">
-            <div class="flex-row">
-                <div class="form-group" style="flex: 1;"><label>Cliente</label><input type="text" id="sale-customer-name"></div>
-                <div class="form-group" style="flex: 1;"><label>Cantidad</label><input type="number" id="sale-qty" min="1" value="1" oninput="calculateTotal()"></div>
-                <div class="form-group" style="flex: 1;"><label>P. Unit ($)</label><input type="number" id="sale-price" oninput="calculateTotal()"></div>
+            <div class="modal-header">
+                <span>🛒 Carrito de Compras (<span id="cart-branch-badge" class="badge badge-teal"></span>)</span>
+                <button class="close-btn" onclick="closeCart()">&times;</button>
             </div>
-            <div class="form-group"><label>Observaciones</label><textarea id="sale-comments" rows="2"></textarea></div>
-            <div style="background: #eff6ff; padding: 15px; text-align:center; margin-bottom: 15px;">
-                <h3 style="color: #1e3a8a;">Total a Pagar: $<span id="sale-total">0.00</span></h3>
+            
+            <div id="cart-empty-msg" style="text-align: center; color: #94a3b8; padding: 20px; font-style: italic;">
+                El carrito está vacío.
             </div>
-            <button class="btn-success" onclick="confirmSale()">Procesar Transacción</button>
+
+            <div id="cart-content-wrapper" class="hidden">
+                <div class="table-responsive">
+                    <table style="min-width: 700px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Producto</th>
+                                <th style="width: 15%;">Cantidad</th>
+                                <th style="width: 40%;">Garantía y Números de Serie</th>
+                                <th style="width: 15%;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-body"></tbody>
+                    </table>
+                </div>
+                
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 10px; color: #475569;">Datos de Facturación / Entrega</h4>
+                    <div class="flex-row" style="margin-bottom: 0;">
+                        <div class="form-group flex-1" style="margin-bottom: 0;"><label>Nombre del Cliente</label><input type="text" id="checkout-customer" placeholder="Ej: Juan Pérez"></div>
+                        <div class="form-group flex-1" style="margin-bottom: 0;"><label>Celular</label><input type="text" id="checkout-phone" placeholder="Ej: 75512345"></div>
+                        <div class="form-group flex-1" style="margin-bottom: 0;"><label>Observación Venta</label><input type="text" id="checkout-comments" placeholder="Opcional"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: flex-end; margin-top: 20px;">
+                    <h2 style="color: var(--primary); margin-bottom: 15px;">Total a Cobrar: $<span id="cart-total">0.00</span></h2>
+                    <div style="display: flex; gap: 10px; width: 100%; justify-content: flex-end; flex-wrap: wrap;">
+                        <button class="btn-danger" style="background: #cbd5e1; color: #333;" onclick="clearCart()">Vaciar Carrito</button>
+                        <button class="btn-success" onclick="processSale()" style="font-size: 1.1em; padding: 12px 25px;">Procesar Pago y Registrar</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL DE HISTORIAL POR PRODUCTO -->
     <div id="history-modal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header"><span>Historial del Producto</span><button class="close-btn" onclick="closeModal('history-modal')">&times;</button></div>
+        <div class="modal-content">
+            <div class="modal-header"><span>Kardex del Producto</span><button class="close-btn" onclick="document.getElementById('history-modal').style.display='none'">&times;</button></div>
             <h3 id="history-product-name" style="margin-bottom: 15px;"></h3>
-            <div style="overflow-x: auto;">
+            <div class="table-responsive">
                 <table>
-                    <thead><tr><th>Fecha</th><th>Vendedor</th><th>Cant.</th><th>Total</th><th>Estado</th></tr></thead>
+                    <thead><tr><th>Fecha</th><th>Vendedor</th><th>Cliente</th><th>Cant. Vendida</th><th>Series Registradas</th><th>Estado</th></tr></thead>
                     <tbody id="history-body"></tbody>
                 </table>
             </div>
@@ -209,64 +249,32 @@
 
     <script>
         // --- BASE DE DATOS LOCAL ---
-        // 1. Nueva lista dinámica de sucursales
         let branches = ['Sucursal Norte', 'Sucursal Sur'];
-
+        
         let users = [
             { id: 1, user: 'admin', pass: '123', role: 'admin', branch: 'Todas', fullName: 'Administrador General' },
-            { id: 2, user: 'norte', pass: '123', role: 'supervisor', branch: 'Sucursal Norte', fullName: 'Juan Pérez (Sup)' },
-            { id: 4, user: 'pedro', pass: '123', role: 'vendedor', branch: 'Sucursal Norte', fullName: 'Pedro Ramírez' }
+            { id: 2, user: 'norte', pass: '123', role: 'vendedor', branch: 'Sucursal Norte', fullName: 'Juan Pérez' }
         ];
 
         let products = [
-            { id: 1, name: 'Placa Madre B650 AORUS', branch: 'Sucursal Norte', stock: 5, price: 210 },
-            { id: 2, name: 'Procesador Intel i5 13400F', branch: 'Sucursal Sur', stock: 1, price: 180 }
+            { id: 1, name: 'Monitor LG 24"', branch: 'Sucursal Norte', stock: 10, price: 150 },
+            { id: 2, name: 'Teclado Mecánico', branch: 'Sucursal Norte', stock: 5, price: 45 },
+            { id: 3, name: 'Mouse Inalámbrico', branch: 'Sucursal Sur', stock: 15, price: 20 }
         ];
 
         let salesLog = []; 
         let currentUser = null;
+        
+        // --- CARRITO DE COMPRAS ---
+        let cart = [];
+        let cartBranch = null; // Para asegurar que no mezclen productos de sucursales distintas
 
-        // --- INICIALIZACIÓN ---
-        // Carga los desplegables de sucursales apenas carga el script
-        function updateBranchSelects() {
-            const userSelect = document.getElementById('new-user-branch-select');
-            const productSelect = document.getElementById('new-product-branch-select');
-            userSelect.innerHTML = '';
-            productSelect.innerHTML = '';
-            
-            branches.forEach(b => {
-                userSelect.innerHTML += `<option value="${b}">${b}</option>`;
-                productSelect.innerHTML += `<option value="${b}">${b}</option>`;
-            });
-            renderBranchesTable();
-        }
-
-        // --- GESTIÓN DE SUCURSALES (EXPANSIÓN) ---
-        function addBranch() {
-            const name = document.getElementById('new-branch-name').value.trim();
-            if (!name) return alert("Ingrese el nombre de la nueva sucursal.");
-            
-            // Validar que no exista ya (ignorando mayúsculas/minúsculas)
-            const exists = branches.find(b => b.toLowerCase() === name.toLowerCase());
-            if (exists) return alert("Esa sucursal ya existe en el sistema.");
-
-            branches.push(name);
-            document.getElementById('new-branch-name').value = '';
-            
-            // Actualizar todas las listas desplegables
+        // Inicialización
+        function initApp() {
             updateBranchSelects();
-            alert(`¡Felicidades! La ${name} ha sido inaugurada exitosamente en el sistema.`);
         }
 
-        function renderBranchesTable() {
-            const tbody = document.getElementById('branches-body');
-            tbody.innerHTML = '';
-            branches.forEach(b => {
-                tbody.innerHTML += `<tr><td><span class="badge badge-teal">Activa</span> <strong>${b}</strong></td></tr>`;
-            });
-        }
-
-        // --- AUTENTICACIÓN ---
+        // --- SISTEMA DE USUARIOS ---
         function login() {
             const u = document.getElementById('login-user').value.toLowerCase();
             const p = document.getElementById('login-pass').value;
@@ -276,147 +284,277 @@
                 currentUser = userFound;
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
+                document.getElementById('main-nav').classList.remove('hidden');
                 
-                document.getElementById('welcome-text').innerText = `Hola, ${currentUser.fullName}`;
-                document.getElementById('user-role-text').innerText = currentUser.role === 'admin' 
-                    ? 'Panel de Control Principal' 
-                    : `${currentUser.role.toUpperCase()} - ${currentUser.branch} (Usuario: ${currentUser.user})`;
+                document.getElementById('nav-user-info').innerText = `${currentUser.fullName} (${currentUser.branch})`;
                 
                 if (currentUser.role === 'admin') {
                     document.getElementById('admin-panel').classList.remove('hidden');
                     document.getElementById('col-sucursal').style.display = 'table-cell';
                     document.getElementById('col-accion').style.display = 'table-cell';
-                    updateBranchSelects(); // Refrescar combos
-                    renderUsersTable();
                 } else {
                     document.getElementById('admin-panel').classList.add('hidden');
                     document.getElementById('col-sucursal').style.display = 'none';
                     document.getElementById('col-accion').style.display = 'none';
                 }
+                
                 renderInventory();
                 renderSalesMonitor();
             } else {
-                alert("Usuario incorrecto o dado de baja.");
+                alert("Credenciales incorrectas.");
             }
         }
 
         function logout() {
             currentUser = null;
+            clearCart();
             document.getElementById('login-view').classList.remove('hidden');
             document.getElementById('app-view').classList.add('hidden');
+            document.getElementById('main-nav').classList.add('hidden');
         }
 
-        // --- GESTIÓN DE PERSONAL ---
-        function renderUsersTable() {
-            const tbody = document.getElementById('users-body');
-            tbody.innerHTML = '';
-            users.forEach(u => {
-                if(u.role === 'admin') return;
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${u.fullName}</strong></td><td><code>${u.user}</code></td>
-                        <td>${u.role}</td><td>${u.branch}</td>
-                        <td><button class="btn-danger btn-small" onclick="deleteUser(${u.id})">Baja</button></td>
-                    </tr>`;
+        // --- EXPANSIÓN Y RRHH (ADMIN) ---
+        function updateBranchSelects() {
+            const userSel = document.getElementById('new-user-branch-select');
+            const prodSel = document.getElementById('new-product-branch-select');
+            if(!userSel || !prodSel) return;
+            userSel.innerHTML = ''; prodSel.innerHTML = '';
+            branches.forEach(b => {
+                userSel.innerHTML += `<option value="${b}">${b}</option>`;
+                prodSel.innerHTML += `<option value="${b}">${b}</option>`;
             });
+        }
+
+        function addBranch() {
+            const name = document.getElementById('new-branch-name').value.trim();
+            if (!name) return;
+            if (branches.find(b => b.toLowerCase() === name.toLowerCase())) return alert("Ya existe.");
+            branches.push(name);
+            document.getElementById('new-branch-name').value = '';
+            updateBranchSelects();
+            alert(`Sucursal ${name} creada.`);
         }
 
         function addUser() {
-            const fullName = document.getElementById('new-user-fullname').value;
-            const nick = document.getElementById('new-user-nick').value.toLowerCase().replace(/\s/g, '');
-            const pass = document.getElementById('new-user-pass').value;
-            const role = document.getElementById('new-user-role').value;
-            const branch = document.getElementById('new-user-branch-select').value; // Usar el select dinámico
-
-            if (!fullName || !nick || !pass) return alert("Complete Nombre, Usuario y Contraseña.");
-            if (users.some(u => u.user === nick)) return alert("El login ya existe.");
-
-            users.push({ id: Date.now(), user: nick, pass: pass, role: role, branch: branch, fullName: fullName });
-            renderUsersTable();
-            alert(`Empleado registrado exitosamente en ${branch}.`);
-        }
-
-        function deleteUser(id) {
-            const uIndex = users.findIndex(u => u.id === id);
-            if (uIndex > -1 && confirm(`¿Dar de baja a ${users[uIndex].fullName}?`)) {
-                users.splice(uIndex, 1);
-                renderUsersTable();
-            }
-        }
-
-        // --- PRODUCTOS ---
-        function renderInventory() {
-            const tbody = document.getElementById('inventory-body');
-            tbody.innerHTML = '';
-            const filtered = currentUser.role === 'admin' ? products : products.filter(p => p.branch === currentUser.branch);
-
-            filtered.forEach(p => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.branch}</td>
-                        <td><span style="color: ${p.stock <= 1 ? 'var(--danger)' : 'var(--success)'}; font-weight: bold;">${p.stock} uds</span></td>
-                        <td>$${p.price}</td>
-                        <td>
-                            <button class="btn-success btn-small" onclick="openSaleModal(${p.id})">Vender</button>
-                            <button class="btn-small" onclick="openHistoryModal(${p.id})" style="background: #4b5563;">Kardex</button>
-                        </td>
-                    </tr>`;
-            });
+            const f = document.getElementById('new-user-fullname').value;
+            const u = document.getElementById('new-user-nick').value.toLowerCase();
+            const b = document.getElementById('new-user-branch-select').value;
+            if(!f || !u) return alert("Complete los datos");
+            if(users.some(x => x.user === u)) return alert("El login ya existe");
+            users.push({ id: Date.now(), user: u, pass: '123', role: 'vendedor', branch: b, fullName: f });
+            document.getElementById('new-user-fullname').value = ''; document.getElementById('new-user-nick').value = '';
+            alert("Usuario creado con clave por defecto: 123");
         }
 
         function addProduct() {
-            const name = document.getElementById('new-name').value;
-            const branch = document.getElementById('new-product-branch-select').value; // Usar el select dinámico
-            const qty = parseInt(document.getElementById('new-qty').value);
-            const price = parseFloat(document.getElementById('new-price').value);
-            
-            if (!name || isNaN(qty) || isNaN(price)) return alert("Datos incompletos.");
-            
-            products.push({ id: Date.now(), name: name, branch: branch, stock: qty, price: price });
-            renderInventory(); alert("Producto indexado.");
+            const n = document.getElementById('new-name').value;
+            const b = document.getElementById('new-product-branch-select').value;
+            const q = parseInt(document.getElementById('new-qty').value);
+            const p = parseFloat(document.getElementById('new-price').value);
+            if(!n || isNaN(q) || isNaN(p)) return alert("Llene el formulario");
+            products.push({ id: Date.now(), name: n, branch: b, stock: q, price: p });
+            renderInventory();
         }
 
-        // --- VENTAS ---
-        function openSaleModal(id) {
+        // --- INVENTARIO Y CATÁLOGO ---
+        function renderInventory() {
+            const tbody = document.getElementById('inventory-body');
+            tbody.innerHTML = '';
+            const list = currentUser.role === 'admin' ? products : products.filter(p => p.branch === currentUser.branch);
+
+            list.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.branch}</td>
+                        <td><span style="color: ${p.stock <= 1 ? 'var(--danger)' : 'var(--success)'}; font-weight: bold;">${p.stock}</span></td>
+                        <td>$${p.price.toFixed(2)}</td>
+                        <td>
+                            <button class="btn-success btn-small" onclick="addToCart(${p.id})">Añadir 🛒</button>
+                            <button class="btn-small" style="background:#64748b; margin-top: 2px;" onclick="openKardex(${p.id})">Kardex</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- LOGICA DEL CARRITO RESPONSIVO ---
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            
+            // Validar Sucursal Unica en Carrito
+            if (cart.length > 0 && cartBranch !== product.branch) {
+                return alert(`El carrito ya contiene productos de ${cartBranch}. Por motivos contables, procese esa venta primero o vacíe el carrito.`);
+            }
+
+            const cartItem = cart.find(item => item.id === productId);
+            const currentQty = cartItem ? cartItem.qty : 0;
+
+            // REGLA: Dejar 1 de resguardo
+            if (product.stock - (currentQty + 1) < 1) {
+                return alert(`Stock insuficiente. Recuerde que el sistema exige mantener 1 unidad física como resguardo en bodega. Quedan ${product.stock} uds.`);
+            }
+
+            if (cartItem) {
+                cartItem.qty++;
+            } else {
+                cartBranch = product.branch;
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    qty: 1,
+                    serials: '',
+                    warranty: '12 Meses'
+                });
+            }
+
+            updateCartUI();
+            alert(`Añadido al carrito: ${product.name}`);
+        }
+
+        function updateCartQty(id, change) {
+            const index = cart.findIndex(i => i.id === id);
+            if (index === -1) return;
+            
             const product = products.find(p => p.id === id);
-            document.getElementById('sale-product-id').value = product.id;
-            document.getElementById('sale-product-name').innerText = product.name;
-            document.getElementById('sale-current-stock').innerText = product.stock;
-            document.getElementById('sale-price').value = product.price; 
-            calculateTotal();
-            document.getElementById('sale-modal').style.display = 'flex';
+            const newQty = cart[index].qty + change;
+
+            if (newQty <= 0) {
+                cart.splice(index, 1);
+                if (cart.length === 0) cartBranch = null;
+            } else {
+                if (product.stock - newQty < 1) {
+                    return alert("Límite de stock alcanzado (Resguardo de 1 unidad aplicado).");
+                }
+                cart[index].qty = newQty;
+            }
+            updateCartUI();
+            renderCartModal(); // Re-renderizar si estamos dentro del modal
         }
 
-        function calculateTotal() {
-            document.getElementById('sale-total').innerText = (
-                (parseInt(document.getElementById('sale-qty').value)||0) * (parseFloat(document.getElementById('sale-price').value)||0)
-            ).toFixed(2);
+        function updateCartItemDetails(id, field, value) {
+            const item = cart.find(i => i.id === id);
+            if (item) item[field] = value;
         }
 
-        function confirmSale() {
-            const id = parseInt(document.getElementById('sale-product-id').value);
-            const qty = parseInt(document.getElementById('sale-qty').value);
-            const product = products.find(p => p.id === id);
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cart-counter').innerText = count;
+        }
 
-            if (product.stock - qty < 1) return alert(`No se permite vender la última unidad.`);
+        function clearCart() {
+            cart = [];
+            cartBranch = null;
+            updateCartUI();
+            renderCartModal();
+        }
+
+        // --- INTERFAZ DEL CARRITO ---
+        function openCart() {
+            renderCartModal();
+            document.getElementById('cart-modal').style.display = 'flex';
+        }
+
+        function closeCart() {
+            document.getElementById('cart-modal').style.display = 'none';
+        }
+
+        function renderCartModal() {
+            const emptyMsg = document.getElementById('cart-empty-msg');
+            const content = document.getElementById('cart-content-wrapper');
+            const tbody = document.getElementById('cart-body');
             
-            product.stock -= qty;
+            if (cart.length === 0) {
+                emptyMsg.classList.remove('hidden');
+                content.classList.add('hidden');
+                document.getElementById('cart-branch-badge').innerText = 'Vacío';
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            content.classList.remove('hidden');
+            document.getElementById('cart-branch-badge').innerText = cartBranch;
+            
+            tbody.innerHTML = '';
+            let total = 0;
+
+            cart.forEach(item => {
+                let subtotal = item.qty * item.price;
+                total += subtotal;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <strong>${item.name}</strong><br>
+                            <small style="color:var(--success);">$${item.price.toFixed(2)} c/u</small>
+                        </td>
+                        <td>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button>
+                                <span style="font-weight:bold; min-width:20px; text-align:center;">${item.qty}</span>
+                                <button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" class="item-details-input" placeholder="Números de Serie (Ej: SN123, SN124)" value="${item.serials}" onchange="updateCartItemDetails(${item.id}, 'serials', this.value)">
+                            <input type="text" class="item-details-input" placeholder="Tiempo Garantía (Ej: 6 Meses)" value="${item.warranty}" onchange="updateCartItemDetails(${item.id}, 'warranty', this.value)">
+                        </td>
+                        <td><strong>$${subtotal.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('cart-total').innerText = total.toFixed(2);
+        }
+
+        function processSale() {
+            if (cart.length === 0) return;
+
+            const custName = document.getElementById('checkout-customer').value.trim() || 'Consumidor Final';
+            const custPhone = document.getElementById('checkout-phone').value.trim() || 'S/N';
+            const comments = document.getElementById('checkout-comments').value.trim() || 'Venta regular';
+            const total = parseFloat(document.getElementById('cart-total').innerText);
+
+            // Descontar Stock Real
+            cart.forEach(item => {
+                const p = products.find(x => x.id === item.id);
+                p.stock -= item.qty;
+            });
+
+            // Registrar Historial
             salesLog.push({
-                id: salesLog.length + 1, date: new Date().toLocaleString('es-ES'),
-                sellerName: currentUser.fullName, sellerRole: currentUser.role,
-                productId: product.id, productName: product.name, branch: product.branch,
-                qty: qty, total: parseFloat(document.getElementById('sale-total').innerText),
-                customer: document.getElementById('sale-customer-name').value || 'General',
-                comments: document.getElementById('sale-comments').value || 'S/O',
+                id: salesLog.length + 1,
+                date: new Date().toLocaleString('es-ES'),
+                sellerName: currentUser.fullName,
+                branch: cartBranch,
+                customer: custName,
+                phone: custPhone,
+                comments: comments,
+                items: JSON.parse(JSON.stringify(cart)), // Clon profundo
+                total: total,
                 status: 'ACTIVA'
             });
 
-            closeModal('sale-modal'); renderInventory(); renderSalesMonitor();
+            alert(`¡Venta Procesada con Éxito!\nTotal: $${total.toFixed(2)}`);
+            
+            // Limpiar todo
+            clearCart();
+            document.getElementById('checkout-customer').value = '';
+            document.getElementById('checkout-phone').value = '';
+            document.getElementById('checkout-comments').value = '';
+            
+            closeCart();
+            renderInventory();
+            renderSalesMonitor();
         }
 
+        // --- MONITOR DE VENTAS ---
         function renderSalesMonitor() {
             const tbody = document.getElementById('sales-body');
             tbody.innerHTML = '';
+            
             const visible = currentUser.role === 'admin' ? salesLog : salesLog.filter(s => s.branch === currentUser.branch);
 
             [...visible].reverse().forEach(sale => {
@@ -424,13 +562,23 @@
                 if (sale.status === 'ANULADA') tr.className = 'anulada';
                 
                 let tdSuc = currentUser.role === 'admin' ? `<td><strong>${sale.branch}</strong></td>` : '';
-                let tdAcc = currentUser.role === 'admin' ? `<td>${sale.status === 'ACTIVA' ? `<button class="btn-danger btn-small" onclick="annulSale(${sale.id})">Anular</button>` : 'Ajustado'}</td>` : '';
+                let tdAcc = currentUser.role === 'admin' ? `<td>${sale.status === 'ACTIVA' ? `<button class="btn-danger btn-small" onclick="annulSale(${sale.id})">Anular</button>` : '-'}</td>` : '';
+
+                // Formatear la lista de productos comprados
+                let itemsList = sale.items.map(i => 
+                    `<b>${i.qty}x</b> ${i.name} <br>
+                     <small style="color:#64748b;">S/N: ${i.serials || 'N/A'} | Gtía: ${i.warranty}</small>`
+                ).join('<hr style="margin: 4px 0; border-top: 1px dashed var(--border);">');
 
                 tr.innerHTML = `
-                    <td>#${sale.id}</td>${tdSuc}
-                    <td>${sale.sellerName}</td><td>${sale.productName}</td><td>${sale.qty}</td>
-                    <td><strong>$${sale.total.toFixed(2)}</strong></td><td>${sale.comments}</td>
-                    <td><span class="badge ${sale.status === 'ACTIVA' ? 'badge-success' : 'badge-danger'}">${sale.status}</span></td>${tdAcc}
+                    <td><strong>#${sale.id}</strong><br><small>${sale.date.split(',')[0]}</small></td>
+                    ${tdSuc}
+                    <td>${sale.sellerName}</td>
+                    <td>${sale.customer}<br><small>Tel: ${sale.phone}</small></td>
+                    <td><div style="max-height: 80px; overflow-y: auto; padding-right: 5px;">${itemsList}</div></td>
+                    <td><strong>$${sale.total.toFixed(2)}</strong><br><small>${sale.comments}</small></td>
+                    <td><span class="badge ${sale.status === 'ACTIVA' ? 'badge-success' : 'badge-danger'}">${sale.status}</span></td>
+                    ${tdAcc}
                 `;
                 tbody.appendChild(tr);
             });
@@ -438,26 +586,48 @@
 
         function annulSale(id) {
             const sale = salesLog.find(s => s.id === id);
-            if (sale && sale.status !== 'ANULADA' && confirm(`¿Anular venta #${id}?`)) {
-                products.find(p => p.id === sale.productId).stock += sale.qty;
+            if (sale && sale.status !== 'ANULADA' && confirm(`ATENCIÓN: ¿Está seguro de anular la venta completa #${id}? Todos los productos volverán al stock.`)) {
+                sale.items.forEach(item => {
+                    const p = products.find(x => x.id === item.id);
+                    if(p) p.stock += item.qty;
+                });
                 sale.status = 'ANULADA';
-                renderInventory(); renderSalesMonitor();
+                renderInventory(); 
+                renderSalesMonitor();
             }
         }
 
-        function openHistoryModal(id) {
-            const tbody = document.getElementById('history-body'); tbody.innerHTML = '';
-            const pSales = salesLog.filter(s => s.productId === id);
-            [...pSales].reverse().forEach(s => {
-                tbody.innerHTML += `<tr class="${s.status === 'ANULADA' ? 'anulada' : ''}"><td>${s.date}</td><td>${s.sellerName}</td><td>${s.qty}</td><td>$${s.total.toFixed(2)}</td><td>${s.status}</td></tr>`;
+        // --- KARDEX ---
+        function openKardex(productId) {
+            const product = products.find(p => p.id === productId);
+            document.getElementById('history-product-name').innerText = `${product.name} (${product.branch})`;
+            const tbody = document.getElementById('history-body'); 
+            tbody.innerHTML = '';
+            
+            // Buscar en todas las ventas, iterando los items del carrito
+            let found = false;
+            [...salesLog].reverse().forEach(sale => {
+                const item = sale.items.find(i => i.id === productId);
+                if (item) {
+                    found = true;
+                    tbody.innerHTML += `
+                        <tr class="${sale.status === 'ANULADA' ? 'anulada' : ''}">
+                            <td>${sale.date} <br><small>Venta #${sale.id}</small></td>
+                            <td>${sale.sellerName}</td>
+                            <td>${sale.customer}</td>
+                            <td><strong>${item.qty}</strong></td>
+                            <td><small>S/N: ${item.serials || 'Ninguno'}<br>Gtía: ${item.warranty}</small></td>
+                            <td>${sale.status}</td>
+                        </tr>`;
+                }
             });
+
+            if (!found) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Sin movimientos</td></tr>';
             document.getElementById('history-modal').style.display = 'flex';
         }
 
-        function closeModal(mId) { document.getElementById(mId).style.display = 'none'; }
-        
-        // Cargar listas iniciales
-        updateBranchSelects();
+        // Arrancar
+        initApp();
     </script>
 </body>
 </html>
